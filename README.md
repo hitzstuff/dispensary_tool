@@ -1,7 +1,7 @@
 # Dispensary Tool for Medical Marijuana Dispensaries
 **Version:** 1.0.0-beta
 
-**Download Link:** https://drive.google.com/u/0/uc?id=1ITxEu_afdQ0f33qdM43VrY6L7fxXpFWb&export=download
+**Download Link:** https://drive.google.com/u/0/uc?id=1Ekh_r6zJhtbmd0OrFvpXJSafo_LCEqEL&export=download&confirm=t&uuid=884379d2-1f6b-488f-bb3c-ab912c5be8b6&at=ACjLJWk68Xn-i3pm0IXoyX2RF-IT:1673479909494
 
 # About:
 The state of Florida places limits on the amount of medical marijuana that a patient may purchase in a given period of time.
@@ -25,6 +25,6 @@ Requirements:
   * PySimpleGUI 4.55.1
 
 # Legal:
-Dispensary Tool for Medical Marijuana Dispensaries is licensed under the GNU License Version 3.0. The full text of this license is available in the LICENSE file.
+Dispensary Tool for Medical Marijuana Dispensaries is licensed under the GNU General Public License Version 3.0. The full text of this license is available in the LICENSE file.
 
 Developed by Aaron Hitzeman <aaron.hitzeman@gmail.com>
