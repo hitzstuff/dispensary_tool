@@ -7,7 +7,6 @@
 The state of Florida places limits on the amount of medical marijuana that a patient may purchase in a given period of time.
 
 This utility is used to quickly calculate the maximum quantity of each product that a medical marijuana patient can purchase.
-
 Product dispensation amounts are configurable and more features are planned for the future.
 
 Future releases and source code are available on my GitHub project page:
