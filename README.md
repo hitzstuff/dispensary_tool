@@ -1,5 +1,5 @@
 # Dispensary Tool for Medical Marijuana Dispensaries
-**Version:** 1.0.0-beta
+**Version:** 1.1.0-beta
 
 **Download Link:** https://drive.google.com/u/0/uc?id=1Ekh_r6zJhtbmd0OrFvpXJSafo_LCEqEL&export=download
 
