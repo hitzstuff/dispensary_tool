@@ -2,13 +2,14 @@ import pathlib
 import webbrowser
 from json import (load as json_load, dump as json_dump)
 import requests
+import math
 import bs4
 import pandas as pd
 import PySimpleGUIQt as sg
 from __init__ import __VERSION__
 
 # Global variables
-THEME = 'SystemDefaultForReal'
+THEME = 'LightGreen3'
 DEFAULT_FONT = 'Open Sans'
 DEFAULT_FONT_SIZE = 11
 DEFAULT_TEXT_JUSTIFICATION = 'left'
@@ -172,14 +173,14 @@ def convert_weight(weight, unit_of_measurement='gram'):
     if unit_of_measurement == 'gram':
         new_weight = weight / 28.34952
     elif unit_of_measurement == 'ounce':
-        new_weight = weight * 28.34952
+        new_weight = round((weight * 28.34952) - 0.04, 1)
     else:
         new_weight = weight
     return new_weight
 
 def maximize_allotment(ounces, prod_1=True, prod_2=True, prod_3=True, prod_4=True, prod_5=True):
     '''Tallies the maximum number of products until the allotment equals zero'''
-    grams = convert_weight(ounces, 'ounce')
+    grams = round(convert_weight(ounces, 'ounce'), 1)
     products = sort_dictionary(MMJ)
     product_1 = list(products)[0]
     product_2 = list(products)[1]
@@ -191,9 +192,9 @@ def maximize_allotment(ounces, prod_1=True, prod_2=True, prod_3=True, prod_4=Tru
     weight_3 = MMJ[product_3]
     weight_4 = MMJ[product_4]
     weight_5 = MMJ[product_5]
-    minimum_allotment = product_5
+    minimum_allotment = MMJ[product_5]
     patient_order = []
-    while (grams > 0) or (grams > minimum_allotment):
+    while (grams > 0) or (grams >= minimum_allotment):
         if (prod_1 is True) and (grams >= weight_1):
             patient_order.append(product_1)
             grams -= weight_1
@@ -212,32 +213,32 @@ def maximize_allotment(ounces, prod_1=True, prod_2=True, prod_3=True, prod_4=Tru
         else:
             break
     ounces = convert_weight(grams, 'gram')
+    patient_order = (pd.DataFrame(patient_order)).value_counts()
+    products_2 = ['']
+    quantities = ['']
+    strings = ['']
+    for i, _ in enumerate(patient_order):
+        product = patient_order.index[i][0]
+        quantity = patient_order[i]
+        weight_g = MMJ[product]
+        total_g = weight_g * quantity
+        total_oz = convert_weight(total_g, 'gram')
+        string = f'= {total_g:.1f} g / {total_oz:.3f} oz'
+        products_2.append(product)
+        quantities.append(quantity)
+        strings.append(string)
+    quantities.append('')
+    quantities.append('')
+    products_2.append('')
+    products_2.append('Remaining:')
+    strings.append('')
+    strings.append(f'{grams:.1f} g / {ounces:.3f} oz')
+    products_2 = pd.DataFrame(products_2, columns=[''])
+    quantities = pd.DataFrame(quantities, columns=[''])
+    strings = pd.DataFrame(strings, columns=[''])
+    order_columns = [quantities, products_2, strings]
+    patient_order = pd.concat(order_columns, axis=1)
     return patient_order, ounces
-
-def clean_order(order, ounces):
-    '''Cleans up a dictionary for easy printing into a window'''
-    order_df = pd.DataFrame(order)
-    order_count = order_df.value_counts()
-    products = list(order_count.index)[0:]
-    patient_order = {}
-    string = ''
-    i = 0
-    for i in range(len(products)):
-        product = list(order_count.index)[i][0]
-        quantity = list(order_count)[i]
-        patient_order[product] = quantity
-        i += 1
-    for product in patient_order.items():
-        weight = float(MMJ[str(product[0])]) * float(product[1])
-        weight = round(convert_weight(weight, 'gram'), 3)
-        new_string = f'{product[1]:2}' + '\t' + f'{product[0]:15}' + f'({weight} oz)'
-        if len(string) == 0:
-            string = new_string
-        else:
-            string = string + (f'\n{new_string}')
-    grams = convert_weight(ounces, 'ounce')
-    string = string + (f'\n\n\nRemaining:\n\t      {ounces:.3f} oz / {grams:.1f} grams')
-    return string
 
 def text_label(text):
     '''Returns a text label'''
@@ -304,6 +305,7 @@ def settings_window(settings):
         layout,
         keep_on_top = True,
         icon = PROGRAM_ICON,
+        resizable = False,
         finalize = True
         )
     # Update the window with the values read from the settings file
@@ -323,7 +325,7 @@ def main_window():
     layout = [
         [sg.Menu(
             menu_bar,
-            background_color = 'LightGray',
+            #background_color = 'LightGray'
             )],
         [sg.Text(
             '',
@@ -399,8 +401,9 @@ def main_window():
         auto_size_buttons = False,
         default_button_element_size = DEFAULT_BUTTON_SIZE,
         element_padding = (0, 0),
-        background_color = 'LightGray',
+        #background_color = 'LightGray',
         icon = PROGRAM_ICON,
+        resizable = False,
         finalize = True
         )
     return window
@@ -428,14 +431,16 @@ def main():
                 if new_version is True:
                     answer = sg.popup_yes_no(
                         UPDATE_MSG_YES,
-                        title = 'Update Available'
+                        title = 'Update Available',
+                        keep_on_top = True
                     )
                     if answer == 'Yes':
                         webbrowser.open(DOWNLOAD_LINK)
                 else:
                     sg.popup(
                         UPDATE_MSG_NO,
-                        title = 'No Updates Available'
+                        title = 'No Updates Available',
+                        keep_on_top = True                        
                     )
             # Load the 'About' message
             if event == 'About':
@@ -443,12 +448,14 @@ def main():
                 if new_version is True:
                     sg.popup(
                         ABOUT_UPDATE,
-                        title = f'{PROGRAM_NAME}  -  New Version Available'
+                        title = f'{PROGRAM_NAME}  -  New Version Available',
+                        keep_on_top = True
                     )
                 else:
                     sg.popup(
                         ABOUT,
-                        title = f'{PROGRAM_NAME}'
+                        title = f'{PROGRAM_NAME}',
+                        keep_on_top = True
                         )
             # Open a web browser to the GitHub page
             if event == 'GitHub Page':
@@ -482,7 +489,7 @@ def main():
                         prod_4=product_4,
                         prod_5=product_5
                         )
-                    order = clean_order(order, ounces)
+                    order = order.to_string(index=False)
                     window['-OUTPUT-'].update(order)
                 except ValueError as v_error:
                     sg.popup_error(
